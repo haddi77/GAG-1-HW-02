@@ -47,10 +47,29 @@ WHERE C.Date > M.Quit_date
 
 
 -- D. How many members have a personal trainer with the same first name as themselves, but have never attended a class that their personal trainer led?
--- Explanation: 
+-- Explanation: We select distinct members and join instructors table, comparing with substring if the first name is the same
+-- we also compare if said members are NOT IN a subquery that finds members that have attended classes led by their own personal trainer
+-- finally it's all wrapped in a count
 
-
-
+SELECT COUNT(*)
+FROM (
+	SELECT DISTINCT M.ID
+	FROM Member M
+	JOIN Instructor I
+		ON M.IID = I.ID
+	WHERE SUBSTRING(M.Name, 0, POSITION(' ' IN M.Name)) = SUBSTRING(I.Name, 0, POSITION(' ' IN I.Name))
+	AND M.ID NOT IN (
+		SELECT DISTINCT M.ID
+		FROM Member M
+		JOIN Instructor I
+			ON M.IID = I.ID
+		JOIN Attends A
+			ON M.ID = A.MID
+		JOIN Class C
+			ON A.CID = C.ID
+		WHERE C.IID = M.IID
+	)
+);
 
 
 -- E. For every class type, return its name and whether it has an average rating higher or equal to 7, or lower than 7, in a column named "Rating" with values "Good" or "Bad", respectively.
