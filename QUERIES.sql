@@ -186,5 +186,42 @@ HAVING SUM(N.Quantity * E.Price / T.Capacity) = (
 -- followed by the 8th letter of all instructors that have not led any "Trampoline Burn" classes, in an ascending order of their IDs.
 -- Explanation: 
 
-
-
+SELECT STRING_AGG(Character, '')
+FROM (
+    SELECT *
+    FROM (
+        SELECT SUBSTRING(M.Name, 5, 1) AS Character
+        FROM Member M
+        WHERE EXTRACT(MONTH FROM M.start_date) = 12 AND EXTRACT(DAY FROM M.start_date) = 24
+        AND M.ID IN (
+            SELECT M.ID
+            FROM (
+                SELECT M.ID, COUNT(DISTINCT M.Digit)
+                FROM (
+                    SELECT M.ID, UNNEST(STRING_TO_ARRAY(CAST(M.Phone AS VARCHAR), NULL)) AS Digit
+                    FROM Member M
+                ) AS M
+                WHERE CAST(Digit AS INTEGER) % 2 != 0
+                GROUP BY M.ID
+            ) AS M
+            WHERE M.Count >= 3
+        )
+        ORDER BY M.ID DESC
+    )
+    UNION ALL
+    SELECT *
+    FROM (
+        SELECT SUBSTRING(I.Name, 8, 1) AS Character
+        FROM Instructor I
+        WHERE I.ID NOT IN (
+            SELECT DISTINCT I.ID
+            FROM Instructor I
+            JOIN Class C
+                ON C.IID = I.ID
+            JOIN Type T
+                ON T.ID = C.TID
+            WHERE T.Name ILIKE '%Trampoline Burn%'
+        )
+        ORDER BY I.ID ASC
+    )
+);
