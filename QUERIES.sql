@@ -119,22 +119,72 @@ FROM (
 ) tmp;
 
 -- H. How many instructors have led a class in all gyms on the same day?
--- Explanation: 
+-- Explanation: We select from Class table, grouping by both instructor id and Date, thus getting one row for each 
+-- instructor on each day, we filter these results with having count of distinct gym id equal to count distinct 
+-- gym id in the gym table (counting the total rows), we wrap this in a select count(*) to find out no one has
+-- achieved this feat, however quite a few have held classes in all but one gym on the same date
 
-
+SELECT COUNT(*)
+FROM (
+	SELECT C.IID
+	FROM Class C
+	GROUP BY C.IID, C.Date
+	HAVING COUNT(DISTINCT C.GID) = (
+		SELECT COUNT(DISTINCT G.ID)
+		FROM Gym G
+	)
+) tmp;
 
 -- I. How many instructors have not led classes of all different class types?
--- Explanation: 
+-- Explanation: We create a list of id's of instructors that have tought all types of classes, similarly to the previous on
+-- by grouping class table on instructor id having count distinct type id equal to count distinct type id from type table
+-- we then use this result as a subquery when selecting from all instructor checking that we only select those that are not
+-- in the previous list, finally the whole thing is wrapped with a select count(*)
 
-
+SELECT COUNT(*)
+FROM (
+    SELECT I.ID
+    FROM Instructor I
+    WHERE I.ID NOT IN (
+        SELECT C.IID
+        FROM Class C
+        GROUP BY C.IID
+        HAVING COUNT(DISTINCT C.TID) = (
+            SELECT COUNT(DISTINCT T.ID)
+            FROM Type T
+        )
+    )
+) tmp;
 
 -- J. The class type "Circuit training" has the lowest equipment cost per member, based on full capacity. Return the name of the class type that has the highest equipment cost per person, based on full capacity.
--- Explanation: 
+-- Explanation: Starting from the innermost subquery we select the Type table joining the needs table on type id and the equipment table on equipment id, we group by type and use the sum aggreate function to sum
+-- cost per person for the class type ( Needs.Quantity * Equipment.Price / ClassType.Capacity), this select is then wrapped in a select max(*) to get the highest value of cost per person
+-- finally this is wrapped in another query which is almost identical to the innermost query except it selects Type Name, HAVING cos per person equal to the max value given by the two subqueries
 
-
+SELECT T.Name
+FROM Type T
+JOIN Needs N
+    ON N.TID = T.ID
+JOIN Equipment E
+    ON E.ID = N.EID
+GROUP BY T.ID
+HAVING SUM(N.Quantity * E.Price / T.Capacity) = (
+    SELECT MAX(*)
+    FROM (
+        SELECT SUM(N.Quantity * E.Price / T.Capacity)
+        FROM Type T
+        JOIN Needs N
+            ON N.TID = T.ID
+        JOIN Equipment E
+            ON E.ID = N.EID
+        GROUP BY T.ID
+    )
+);
 
 -- K (BONUS). The hacker revealed in query C has left a message for the database engineers. This message may save the database!
 -- Return the 5th letter of all members that started the gym on December 24th of any year and have at least 3 different odd numbers in their phone number, in a descending order of their IDs,
 -- followed by the 8th letter of all instructors that have not led any "Trampoline Burn" classes, in an ascending order of their IDs.
 -- Explanation: 
+
+
 
