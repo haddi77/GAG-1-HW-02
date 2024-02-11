@@ -73,19 +73,50 @@ FROM (
 
 
 -- E. For every class type, return its name and whether it has an average rating higher or equal to 7, or lower than 7, in a column named "Rating" with values "Good" or "Bad", respectively.
--- Explanation: 
+-- Explanation: We select from Type table the name of each class table, we join class table and attends table to get the ratings, group by type id and then use AVG to get the average rating
+-- for each type of class, however since we wan't not the actual rating but good or bad we but a CASE WHEN in the select to output Good when rating is greater than or equal to 7 and bad for
+-- ratings less than 7, we Put the word 'Rating' after the end keyword of the CASE statement to name the output column
 
-
+Select T.Name,
+	CASE
+		WHEN AVG(A.Rating) >= 7 THEN
+		'Good'
+		ELSE 'Bad'
+	END Rating
+FROM Type T
+JOIN Class C
+	ON T.ID = C.TID
+JOIN Attends A
+	ON C.ID = A.CID
+GROUP BY T.ID;
 
 -- F. Out of the members that have not quit, member with ID 6976 has been a customer for the shortest time. Out of the members that have not quit, return the ID of the member(s) that have been customer(s) for the longest time.
--- Explanation: 
+-- Explanation: We select the maximum among new - start_date from members table to get the longest memberships, we then use that as a subquery and select members that have membership length equal to the maximum and also have not quit
 
-
+SELECT M.ID
+FROM Member M
+WHERE M.quit_date IS NULL
+AND NOW() - M.start_date IN (
+	SELECT MAX(NOW() - M.start_date)
+	FROM Member M
+);
 
 -- G. How many class types have at least one equipment that costs more than 100.000 and at least one other equipment that costs less than 5.000?
--- Explanation: 
+-- Explanation: We select from the type table joining needs on type id and then equipment on eqpuiment id from needs, we group by type id and
+-- filter with having so we get only class types that have equipment with price less than 5000 and with equipoment costin more than 100.000
+-- finally we wrap the whole thing in a count select, also, it's crossfit
 
-
+SELECT COUNT(*)
+FROM (
+	SELECT T.ID
+	FROM Type T
+	JOIN Needs N
+		ON N.TID = T.ID
+	JOIN Equipment E
+		ON E.ID = N.EID
+	GROUP BY T.ID
+	HAVING MIN(E.Price) < 5000 AND MAX(E.Price) > 100000
+) tmp;
 
 -- H. How many instructors have led a class in all gyms on the same day?
 -- Explanation: 
