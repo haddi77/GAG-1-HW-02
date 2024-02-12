@@ -11,9 +11,8 @@ FROM (
 	FROM Attends A
 	JOIN Class C
 		ON A.CID = C.ID
-	WHERE C.Date = '%-01-15'
+	WHERE EXTRACT(DAY FROM C.Date) = 15 AND EXTRACT(MONTH FROM C.Date) = 1
 ) tmp;
-
 
 -- B. 4 different class types require more than 20 light dumbbells. How many class types require more than 20 yoga mats?
 -- Explanation: We select from Type table , joining needs table on type id to get the equipment that each class type needs along with
