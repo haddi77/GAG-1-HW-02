@@ -11,7 +11,7 @@ FROM (
 	FROM Attends A
 	JOIN Class C
 		ON A.CID = C.ID
-	WHERE C.Date = '2023-01-15'
+	WHERE C.Date = '%-01-15'
 ) tmp;
 
 
@@ -28,7 +28,7 @@ FROM (
 		ON T.ID = N.TID
 	JOIN Equipment E
 		ON E.ID = N.EID
-	WHERE N.Quantity >= 20 AND E.Name ILIKE '%yoga mat%'
+	WHERE N.Quantity > 20 AND E.Name ILIKE '%yoga mat%'
 ) tmp;
 
 
@@ -169,9 +169,9 @@ JOIN Equipment E
     ON E.ID = N.EID
 GROUP BY T.ID
 HAVING SUM(N.Quantity * E.Price / T.Capacity) = (
-    SELECT MAX(*)
+    SELECT MAX(priceper)
     FROM (
-        SELECT SUM(N.Quantity * E.Price / T.Capacity)
+        SELECT SUM(N.Quantity * E.Price / T.Capacity) AS priceper
         FROM Type T
         JOIN Needs N
             ON N.TID = T.ID
