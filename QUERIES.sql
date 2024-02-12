@@ -19,6 +19,7 @@ FROM (
 -- the quantity and also we join equipment table to be able to filter by equipment name (using ILIKE and wildcards)
 -- we also filter on the quantity needed and finally wrap the whole thing in a count select
 
+
 SELECT COUNT(*)
 FROM (
 	SELECT T.ID
@@ -42,7 +43,7 @@ JOIN Attends A
 	ON M.ID = A.MID
 JOIN Class C
 	ON A.CID = C.ID
-WHERE C.Date > M.Quit_date
+WHERE C.Date > M.Quit_date;
 
 
 -- D. How many members have a personal trainer with the same first name as themselves, but have never attended a class that their personal trainer led?
