@@ -207,7 +207,7 @@ FROM (
             WHERE M.Count >= 3
         )
         ORDER BY M.ID DESC
-    )
+    ) AS MEMBERLETTERS
     UNION ALL
     SELECT *
     FROM (
@@ -223,5 +223,5 @@ FROM (
             WHERE T.Name ILIKE '%Trampoline Burn%'
         )
         ORDER BY I.ID ASC
-    )
+    ) AS INSTRUCTORLETTERS
 );
